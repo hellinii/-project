@@ -33,17 +33,17 @@ NYC 택시 데이터를 기반으로 경로별 운행 효율성과 혼잡도를 
 - `main.tsx`: Entry point for the React application
 - `index.css`: Global styles and Tailwind CSS directives
 
-## Backend API Specification
+## Backend API Specification (프론트엔드 기준)
 
-현재 프론트엔드는 Mock Data를 사용하여 UI가 구성되어 있습니다. 백엔드 개발 시 다음 사항을 참고하여 API를 구현해주시면 됩니다.
+프론트엔드에서 요구하는 API 명세입니다. 백엔드 개발 시 이 명세에 맞춰 구현해주세요.
 
 ### API Endpoint
 
 - **URL**: `http://localhost:5000/analyze`
 - **Method**: `GET`
 - **Query Parameters**:
-    - `pu_borough`: 출발지 (예: "Manhattan")
-    - `do_borough`: 도착지 (예: "Bronx")
+    - `pu_borough`: 출발지 자치구 (예: "Manhattan")
+    - `do_borough`: 도착지 자치구 (예: "Bronx")
     - `time`: 시간 (24시간제 "HH:mm" 형식, 예: "15:30")
 
 #### Request Example
@@ -54,6 +54,8 @@ Host: localhost:5000
 ```
 
 ### Response Data Structure (JSON)
+
+백엔드는 다음 JSON 구조를 반환해야 합니다:
 
 ```json
 {
@@ -74,6 +76,14 @@ Host: localhost:5000
       "time": "14:00:00",
       "avg_distance": 12.4,
       "avg_cost": 15.50
+    },
+    {
+      "tli": 1.15,
+      "avg_duration": 15.8,
+      "std_duration": 2.2,
+      "time": "14:15:00",
+      "avg_distance": 12.6,
+      "avg_cost": 15.80
     }
   ],
   "nearest_future": [
@@ -84,10 +94,41 @@ Host: localhost:5000
       "time": "14:45:00",
       "avg_distance": 12.3,
       "avg_cost": 15.60
+    },
+    {
+      "tli": 1.4,
+      "avg_duration": 14.0,
+      "std_duration": 1.8,
+      "time": "15:00:00",
+      "avg_distance": 12.2,
+      "avg_cost": 15.40
     }
   ]
 }
 ```
+
+### Response Fields
+
+#### TLIResult 객체 (current_match, nearest_past[], nearest_future[])
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `tli` | number | Taxi Luck Index (운행 변동성 지표) |
+| `avg_duration` | number | 평균 소요 시간 (분) |
+| `std_duration` | number | 표준 편차 (분) |
+| `time` | string | 시간 ("HH:MM:SS" 형식) |
+| `avg_distance` | number | 평균 거리 (마일) |
+| `avg_cost` | number | 평균 비용 (USD) |
+
+#### AnalysisResponse 객체
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `status` | string | 응답 상태 ("success" 또는 "error") |
+| `current_match` | TLIResult | 입력 시간과 가장 가까운 시간대 데이터 |
+| `nearest_past` | TLIResult[] | 과거 시간대 데이터 배열 |
+| `nearest_future` | TLIResult[] | 미래 시간대 데이터 배열 |
+| `error` | string (optional) | 에러 메시지 (status가 "error"일 때) |
 
 ### Frontend Integration
 

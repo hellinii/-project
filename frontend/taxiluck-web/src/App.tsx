@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Clock, Zap, MapPin, Target } from 'lucide-react';
+import { Clock, Zap, MapPin, Target, RefreshCw } from 'lucide-react';
 
 // --- 타입 정의 (TypeScript) ---
 interface TLIResult {

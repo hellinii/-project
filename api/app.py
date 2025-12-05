@@ -8,7 +8,7 @@ import numpy as np # 표준 편차 계산을 위해 필요
 # --- 0. 데이터 로드 및 전처리 (서버 시작 시 1회 실행) ---
 
 # TLI Gold Layer 데이터 파일 경로 설정
-DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'TLI_FINAL_output.csv') 
+DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'TLI_FINAL.csv') 
 CI_DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'ci_final.csv')
 
 # 1. 데이터 로드 및 오류 처리
@@ -39,7 +39,7 @@ CI_HOUR_COL = 'tf_hour'
 CI_MIN_COL = 'tf_min_block'
 CI_VAL_COL = 'CI'
 
-# 3. 시간 변환 및 'full_time' (24시간제) 생성 (가장 중요)
+# 3. 시간 변환 및 'full_time' (24시간제) 생성 
 def calculate_full_time(row, hour_col, min_col, ampm_col):
     try:
         hour = int(row[hour_col])

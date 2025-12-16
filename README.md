@@ -76,7 +76,7 @@ npm run dev   # http://localhost:5173 에서 확인
 ## 7. Execution Result
 
 - Screenshot: `./assets/result.png` (대시보드 화면 예시)
-- Demo Video: [YouTube 링크 또는 `./assets/demo.mp4`](https://youtu.be/9YO_kKrQfO4)
+- Demo Video: [YouTube 링크를 통해 확인할 수 있습니다`](https://youtu.be/9YO_kKrQfO4)
 
 ![Dashboard Screenshot](assets/result.png)
 

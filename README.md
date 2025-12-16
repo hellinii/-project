@@ -1,142 +1,92 @@
 # Taxi Lucky Rate Dashboard
 
-NYC 택시 데이터를 기반으로 경로별 운행 효율성과 혼잡도를 분석하는 대시보드입니다.
+## 1. Project Overview
 
-## Project Structure
+뉴욕시 택시가 움직이는 다섯 구역(Manhattan, Brooklyn, Queens, Bronx, Staten Island) 사이의 이동 상황을 시간대별로 보여주는 프로젝트입니다.  
+사용자는 출발지와 도착지, 그리고 “몇 시에 이동할지”를 입력하면:
 
-### Root Directory
+- 이동이 얼마나 순조로울지 나타내는 지수 **TLI (Taxi Luck Index)**
+- 도로가 얼마나 붐비는지 나타내는 **CI (Congestion Index)**
+- 예상 이동 시간, 이동 거리, 평균 요금  
+  을 한 번에 확인할 수 있습니다. 결과는 백엔드(API)가 계산해 주고, 프런트엔드는 이를 보기 좋게 화면에 보여줍니다.
 
-- `api/`: Backend code (Flask application)
-    - `app.py`: Main entry point for the backend server. Handles API requests and data processing
-    - `requirements.txt`: Python dependencies
-- `data/`: Data files used by the backend
-    - `TLI_FINAL_output.csv`: The main dataset containing TLI scores and duration data
-- `frontend/`: Frontend code (React application)
-    - `taxiluck-web/`: The main React project directory
+## 2. Motivation & Planning
 
-### Frontend Directory (`frontend/taxiluck-web/src`)
+- 문제 인식: 언제 택시를 타면 빠를지, 얼마나 막힐지 미리 알기 어렵습니다.
+- 해결 목표: 시간대별 데이터로 “지금 가면 얼마나 걸릴까?”를 숫자로 알려주고, 더 좋은 시간대도 함께 제안합니다.
+- 주요 사용자: 택시 승객, 기사, 차량 운영자, 교통·데이터 분석가.
 
-- `api/`: API handling logic
-    - `analyzeRoute.ts`: Functions to call the backend API (currently using mock data)
-- `components/`: Reusable UI components
-    - `Header.tsx`: Application header
-    - `RouteForm.tsx`: Input form for origin, destination, and time
-    - `TLISection.tsx`: Displays the Taxi Luck Index (TLI) and Congestion Index (CI)
-    - `TimelineSection.tsx`: Displays time-based analysis (past/future slots)
-    - `StatsSection.tsx`: Displays average distance and cost
-- `mocks/`: Mock data for development and testing
-    - `mockData.ts`: Sample data used when the backend is unavailable
-- `utils/`: Utility functions
-    - `tliUtils.ts`: Helper functions for TLI color coding and time formatting
-- `App.tsx`: Main application component that orchestrates the layout and state
-- `types.ts`: TypeScript interface definitions for data structures
-- `main.tsx`: Entry point for the React application
-- `index.css`: Global styles and Tailwind CSS directives
+## 3. Main Features
 
-## Backend API Specification (프론트엔드 기준)
+1. 경로·시간 분석
+   - 출발/도착 구역과 시간을 넣으면 가장 가까운 데이터로 TLI, CI, 예상 시간·거리·비용을 계산해 줍니다.
+2. 혼잡도 표시
+   - 출발지와 도착지의 혼잡도를 합산·평균해 현재 붐빔 정도를 알려줍니다.
+3. 인접 시간대 추천
+   - 입력한 시간 앞뒤로 3개씩(최대 6개) 가까운 시간대도 함께 보여줘 “조금 더 일찍/늦게 가면 어떤지” 비교할 수 있습니다.
 
-프론트엔드에서 요구하는 API 명세입니다. 백엔드 개발 시 이 명세에 맞춰 구현해주세요.
+## 4. Tech Stack
 
-### API Endpoint
+- Backend: Python 3, Flask, pandas, numpy  
+  (서버가 CSV 데이터를 읽어 계산합니다.)
+- Data: `data/TLI_FINAL.csv`, `data/ci_final.csv` (시간대별 이동 지표가 담긴 파일)
+- Frontend: React, TypeScript, Vite, Tailwind CDN  
+  (API 결과를 웹 화면으로 보여주는 선택 사항)
+- Tools: pip, npm
 
-- **URL**: `http://localhost:5000/analyze`
-- **Method**: `GET`
-- **Query Parameters**:
-    - `pu_borough`: 출발지 자치구 (예: "Manhattan")
-    - `do_borough`: 도착지 자치구 (예: "Bronx")
-    - `time`: 시간 (24시간제 "HH:mm" 형식, 예: "15:30")
+## 5. Program Structure
 
-#### Request Example
-
-```http
-GET /analyze?pu_borough=Manhattan&do_borough=Bronx&time=15:30 HTTP/1.1
-Host: localhost:5000
+```text
+taxi-lucky-rate-dashboard/
+├─ api/               # Flask 백엔드 (app.py, requirements.txt)
+├─ data/              # TLI_FINAL.csv, ci_final.csv 원본 데이터
+├─ frontend/
+│  └─ taxiluck-web/   # React + Vite 프런트엔드 소스
+└─ README.md
 ```
 
-### Response Data Structure (JSON)
+## 6. How to Run
 
-백엔드는 다음 JSON 구조를 반환해야 합니다:
+### A) 백엔드(API) 실행
 
-```json
-{
-  "status": "success",
-  "current_match": {
-    "tli": 1.2,
-    "avg_duration": 15.5,
-    "std_duration": 2.1,
-    "time": "14:30:00",
-    "avg_distance": 12.5,
-    "avg_cost": 15.70
-  },
-  "nearest_past": [
-    {
-      "tli": 1.1,
-      "avg_duration": 16.0,
-      "std_duration": 2.0,
-      "time": "14:00:00",
-      "avg_distance": 12.4,
-      "avg_cost": 15.50
-    },
-    {
-      "tli": 1.15,
-      "avg_duration": 15.8,
-      "std_duration": 2.2,
-      "time": "14:15:00",
-      "avg_distance": 12.6,
-      "avg_cost": 15.80
-    }
-  ],
-  "nearest_future": [
-    {
-      "tli": 1.3,
-      "avg_duration": 14.5,
-      "std_duration": 1.9,
-      "time": "14:45:00",
-      "avg_distance": 12.3,
-      "avg_cost": 15.60
-    },
-    {
-      "tli": 1.4,
-      "avg_duration": 14.0,
-      "std_duration": 1.8,
-      "time": "15:00:00",
-      "avg_distance": 12.2,
-      "avg_cost": 15.40
-    }
-  ]
-}
+1. Python 3 설치 후 아래를 순서대로 실행하세요.
+
+```bash
+cd api
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+# data/ 폴더에 TLI_FINAL.csv, ci_final.csv 가 있어야 합니다.
+python app.py   # 기본 포트 5001
 ```
 
-### Response Fields
+2. 서버가 켜진 후 브라우저에서 예시로 확인할 수 있습니다:  
+   `http://127.0.0.1:5000/analyze?pu_borough=Manhattan&do_borough=Bronx&time=07:30`
 
-#### TLIResult 객체 (current_match, nearest_past[], nearest_future[])
+### B) 프런트엔드 실행
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `tli` | number | Taxi Luck Index (운행 변동성 지표) |
-| `avg_duration` | number | 평균 소요 시간 (분) |
-| `std_duration` | number | 표준 편차 (분) |
-| `time` | string | 시간 ("HH:MM:SS" 형식) |
-| `avg_distance` | number | 평균 거리 (마일) |
-| `avg_cost` | number | 평균 비용 (USD) |
+1. Node.js가 있다면 다음을 실행하세요.
 
-#### AnalysisResponse 객체
+```bash
+cd frontend/taxiluck-web
+npm install
+# API 주소를 바꾸려면 VITE_API_URL 환경변수로 지정 (기본: http://localhost:5001/analyze)
+npm run dev   # http://localhost:5173 에서 확인
+```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `status` | string | 응답 상태 ("success" 또는 "error") |
-| `current_match` | TLIResult | 입력 시간과 가장 가까운 시간대 데이터 |
-| `nearest_past` | TLIResult[] | 과거 시간대 데이터 배열 |
-| `nearest_future` | TLIResult[] | 미래 시간대 데이터 배열 |
-| `error` | string (optional) | 에러 메시지 (status가 "error"일 때) |
+## 7. Execution Result
 
-### Frontend Integration
+- Screenshot: `./assets/result.png` (대시보드 화면 예시)
+- Demo Video: YouTube 링크 또는 `./assets/demo.mp4`
 
-백엔드 API가 준비되면 `frontend/taxiluck-web/src/api/analyzeRoute.ts` 파일에서:
-1. `MOCK_ANALYSIS_RESPONSE` 사용 부분을 주석 처리하거나 삭제
-2. 주석 처리된 `fetch` 호출 로직을 다시 활성화
+![Dashboard Screenshot](assets/result.png)
 
-### Reference Files
+```text
+project-root/
+├─ assets/
+│  ├─ result.png
+│  └─ demo.mp4
+```
 
-- `frontend/taxiluck-web/src/types.ts`: TypeScript 인터페이스 정의
-- `frontend/taxiluck-web/src/mocks/mockData.ts`: Mock Data 예시
+## 8. Conclusion
+
+이 프로젝트를 통해 “언제 이동하면 더 수월할지”를 숫자와 그래프로 쉽게 확인할 수 있습니다.
